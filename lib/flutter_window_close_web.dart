@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:js_interop';
 
 // In order to *not* need this ignore, consider extracting the "web" version
 // of your plugin as a separate package, instead of inlining it in the same
 // package as the core of your plugin.
 // ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
+import 'package:web/web.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -23,10 +24,12 @@ class FlutterWindowClosePluginWeb {
   }
 
   FlutterWindowClosePluginWeb() {
-    html.window.onBeforeUnload.listen((event) {
-      if (event is html.BeforeUnloadEvent) {
+    EventStreamProvider("beforeunload").forTarget(window).listen((event) {
+      if (event.instanceOfString("BeforeUnloadEvent")) {
         if (_returnValue != null) {
-          event.returnValue = _returnValue;
+          var beforeUnloadEvent = event as BeforeUnloadEvent;
+          beforeUnloadEvent.preventDefault();
+          beforeUnloadEvent.returnValue = _returnValue!;
         }
       }
     });
